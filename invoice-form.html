@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Invoice</title>
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f2f2f7;color:#1c1c1e;min-height:100vh;padding-bottom:52px}
+
+/* HEADER */
+.hdr{background:#fff;padding:14px 16px 12px;border-bottom:1px solid #e5e5ea;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.hdr h1{font-size:19px;font-weight:700;color:#007aff;margin-bottom:11px}
+.row2{display:flex;gap:10px}
+.fg{flex:1;display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:11px;font-weight:600;color:#8e8e93;text-transform:uppercase;letter-spacing:.4px}
+.fg input{height:44px;border:1.5px solid #e5e5ea;border-radius:10px;padding:0 11px;font-size:15px;color:#1c1c1e;background:#f9f9fb;outline:none;width:100%;-webkit-appearance:none;appearance:none}
+.fg input:focus{border-color:#007aff;background:#fff}
+
+/* SECTION */
+.sec{font-size:11px;font-weight:600;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;padding:13px 16px 5px}
+
+/* SEARCH */
+.swrap{padding:0 16px 8px}
+.sbox{display:flex;align-items:center;background:#e9e9ef;border-radius:10px;padding:0 11px;gap:7px}
+.sbox svg{color:#8e8e93;flex-shrink:0}
+.sbox input{flex:1;height:40px;border:none;background:transparent;font-size:16px;color:#1c1c1e;outline:none}
+.sbox input::placeholder{color:#8e8e93}
+.clr{color:#8e8e93;cursor:pointer;font-size:17px;padding:4px;display:none;line-height:1}
+
+/* BRAND CHIPS */
+.chips-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 16px 10px;display:flex;gap:7px;scrollbar-width:none}
+.chips-wrap::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;height:32px;padding:0 13px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#e9e9ef;color:#1c1c1e;white-space:nowrap;-webkit-appearance:none;appearance:none}
+.chip.active{background:#007aff;color:#fff}
+
+/* PRODUCT LIST */
+.plist{background:#fff;border-radius:12px;margin:0 16px;overflow:hidden;border:1px solid #e5e5ea;max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pitem{display:flex;align-items:center;padding:11px 13px;border-bottom:1px solid #f2f2f7;cursor:pointer;gap:8px;min-height:50px}
+.pitem:last-child{border-bottom:none}
+.pitem:active{background:#f0f4ff}
+.pitem.ic{opacity:.35;pointer-events:none}
+.pname{font-size:14px;color:#1c1c1e;line-height:1.3;flex:1}
+.ptag{font-size:12px;font-weight:600;white-space:nowrap}
+.ptag.has{color:#34c759}
+.ptag.no{color:#ff9500}
+.addcircle{width:28px;height:28px;background:#007aff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nores{padding:22px 16px;text-align:center;color:#8e8e93;font-size:14px}
+
+/* CART */
+.clist{background:#fff;border-radius:12px;margin:0 16px;overflow:hidden;border:1px solid #e5e5ea}
+.cempty{padding:26px 16px;text-align:center;color:#8e8e93;font-size:14px}
+.cempty-icon{font-size:28px;margin-bottom:5px}
+.citem{padding:11px 13px;border-bottom:1px solid #f2f2f7}
+.citem:last-child{border-bottom:none}
+.ctop{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px}
+.cname{font-size:14px;font-weight:500;color:#1c1c1e;line-height:1.3;flex:1}
+.rmbtn{width:26px;height:26px;background:#ff3b30;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;margin-top:1px}
+.ctrls{display:flex;gap:9px}
+.ctrl{flex:1;display:flex;flex-direction:column;gap:3px}
+.ctrl label{font-size:11px;font-weight:600;color:#8e8e93;text-transform:uppercase;letter-spacing:.4px}
+.ctrl input{height:42px;border:1.5px solid #e5e5ea;border-radius:10px;padding:0 10px;font-size:16px;color:#1c1c1e;background:#f9f9fb;outline:none;width:100%;-webkit-appearance:none;appearance:none}
+.ctrl input:focus{border-color:#007aff;background:#fff}
+.ctrl input.np{border-color:#ff9500;background:#fff9f0}
+.nlbl{font-size:11px;color:#ff9500;margin-top:2px}
+.sub{font-size:12px;color:#8e8e93;text-align:right;margin-top:6px}
+.sub b{color:#1c1c1e}
+
+/* TOTAL */
+.tbar{background:#fff;border-radius:12px;margin:0 16px;padding:13px 15px;border:1px solid #e5e5ea;display:flex;justify-content:space-between;align-items:center}
+.tlbl{font-size:15px;font-weight:600}
+.tamt{font-size:21px;font-weight:700;color:#007aff}
+.mnote{font-size:12px;color:#ff9500;padding:4px 16px 0}
+
+/* EXPORT BTN (legacy, kept for safety) */
+.expbtn{height:52px;background:#007aff;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none;flex:1}
+.expbtn:active{opacity:.82}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center}
+.moverlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:72vh;padding:18px 15px 36px;display:flex;flex-direction:column;gap:11px}
+.modal h2{font-size:16px;font-weight:700}
+.modal p{font-size:13px;color:#8e8e93;line-height:1.4}
+.csvbox{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f2f2f7;border-radius:10px;padding:11px;font-size:11px;font-family:monospace;white-space:pre;color:#1c1c1e;min-height:110px;max-height:230px;-webkit-user-select:all;user-select:all}
+.mbtns{display:flex;gap:9px}
+.copybtn{flex:1;height:48px;background:#007aff;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.copybtn:active{opacity:.8}
+.copybtn.done{background:#34c759}
+.closebtn{height:48px;padding:0 17px;background:#e9e9ef;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:500;cursor:pointer}
+
+.gap{height:11px}
+
+/* WHATSAPP BTN */
+.warow{padding:8px 16px 0}
+.wabtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;background:#25d366;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none}
+.wabtn:active{opacity:.85}
+.wabtn svg{flex-shrink:0}
+
+/* CUSTOM ITEM */
+.custbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 32px);margin:8px 16px 0;height:44px;background:#fff;border:1.5px dashed #007aff;border-radius:12px;color:#007aff;font-size:15px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none}
+.custbtn:active{background:#f0f4ff}
+
+/* CUSTOM ITEM MODAL */
+.custoverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;align-items:flex-end;justify-content:center}
+.custoverlay.open{display:flex}
+.custmodal{background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px 16px 40px;display:flex;flex-direction:column;gap:13px}
+.custmodal h2{font-size:17px;font-weight:700;color:#1c1c1e}
+.custmodal .cfield{display:flex;flex-direction:column;gap:4px}
+.custmodal .cfield label{font-size:11px;font-weight:600;color:#8e8e93;text-transform:uppercase;letter-spacing:.4px}
+.custmodal .cfield input{height:46px;border:1.5px solid #e5e5ea;border-radius:11px;padding:0 13px;font-size:16px;color:#1c1c1e;background:#f9f9fb;outline:none;width:100%;-webkit-appearance:none;appearance:none}
+.custmodal .cfield input:focus{border-color:#007aff;background:#fff}
+.custmodal .crow{display:flex;gap:10px}
+.custmodal .crow .cfield{flex:1}
+.custaddbtn{height:50px;background:#007aff;color:#fff;border:none;border-radius:13px;font-size:16px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none}
+.custaddbtn:active{opacity:.82}
+.custcancelbtn{height:50px;padding:0 18px;background:#e9e9ef;color:#1c1c1e;border:none;border-radius:13px;font-size:16px;font-weight:500;cursor:pointer}
+.custbtnsrow{display:flex;gap:10px}
+.custbtnsrow .custaddbtn{flex:1}
+
+/* EXPORT BUTTONS ROW */
+.exprow{display:flex;gap:10px;padding:0 16px}
+.expbtn2{flex:1;height:52px;background:#007aff;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none}
+.expbtn2:active{opacity:.82}
+.expbtn2.green{background:#34c759}
+
+/* IMAGE MODAL */
+.imgoverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:flex-end;justify-content:center}
+.imgoverlay.open{display:flex}
+.imgmodal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:85vh;padding:16px 15px 36px;display:flex;flex-direction:column;gap:10px}
+.imgmodal h2{font-size:16px;font-weight:700}
+.imgmodal p{font-size:13px;color:#8e8e93;line-height:1.4}
+.imgscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f2f2f7;border-radius:12px;padding:10px;min-height:200px;display:flex;align-items:flex-start;justify-content:center}
+.imgscroll img{width:100%;border-radius:6px;display:block}
+.imgbtns{display:flex;gap:9px}
+.savebtn{flex:1;height:48px;background:#34c759;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.savebtn:active{opacity:.8}
+.imgclosebtn{height:48px;padding:0 17px;background:#e9e9ef;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:500;cursor:pointer}
+
+@media print{
+  body>*{display:none!important}
+  #printview{display:block!important;position:fixed;inset:0;background:#fff;padding:30px;font-family:Arial,sans-serif}
+}
+#printview{display:none}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🧾 Invoice</h1>
+  <div class="row2">
+    <div class="fg"><label>Customer Name</label>
+      <input type="text" id="cname" placeholder="Enter name" autocomplete="off" autocorrect="off" autocapitalize="words"></div>
+    <div class="fg"><label>Date</label>
+      <input type="date" id="idate"></div>
+  </div>
+</div>
+
+<div class="sec">Add Products</div>
+<div class="swrap">
+  <div class="sbox">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="srch" placeholder="Search products…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <span class="clr" id="clrbtn">&#x2715;</span>
+  </div>
+</div>
+<div class="chips-wrap" id="chips"></div>
+<div class="plist" id="plist"></div>
+
+<button class="custbtn" id="custbtn">＋ Add Custom Item</button>
+
+<div class="gap"></div>
+<div class="sec">Invoice Items</div>
+<div class="clist" id="clist"><div class="cempty"><div class="cempty-icon">🛒</div>Tap a product above to add it</div></div>
+
+<div class="gap"></div>
+<div class="tbar"><span class="tlbl">Total</span><span class="tamt" id="tamt">IQD 0</span></div>
+<div class="mnote" id="mnote" style="display:none">⚠️ Some prices are missing — total may be incomplete</div>
+
+<div class="gap"></div>
+<div class="exprow">
+  <button class="expbtn2" id="expbtn">📄 Export CSV</button>
+  <button class="expbtn2 green" id="imgbtn">🖼️ Export Invoice</button>
+</div>
+<div class="warow">
+  <button class="wabtn" id="wabtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Share via WhatsApp
+  </button>
+</div>
+<div class="gap"></div>
+
+<!-- IMAGE MODAL -->
+<div class="imgoverlay" id="imgoverlay">
+  <div class="imgmodal">
+    <h2>🧾 Invoice Image</h2>
+    <p>Long-press the image → <strong>Save to Photos</strong> or <strong>Share</strong>. On desktop, right-click → Save image.</p>
+    <div class="imgscroll"><img id="invoiceimg" src="" alt="Invoice"></div>
+    <div class="imgbtns">
+      <button class="savebtn" id="dlbtn">⬇ Download</button>
+      <button class="imgclosebtn" id="imgclosebtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM ITEM MODAL -->
+<div class="custoverlay" id="custoverlay">
+  <div class="custmodal">
+    <h2>✏️ Add Custom Item</h2>
+    <div class="cfield">
+      <label>Item Name</label>
+      <input type="text" id="cust-name" placeholder="e.g. Special Supplement" autocomplete="off" autocorrect="off" autocapitalize="words">
+    </div>
+    <div class="crow">
+      <div class="cfield">
+        <label>Price (IQD)</label>
+        <input type="number" id="cust-price" placeholder="Optional" min="0" inputmode="numeric">
+      </div>
+      <div class="cfield">
+        <label>Quantity</label>
+        <input type="number" id="cust-qty" value="1" min="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="custbtnsrow">
+      <button class="custaddbtn" id="custaddbtn">Add to Invoice</button>
+      <button class="custcancelbtn" id="custcancelbtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV MODAL -->
+<div class="moverlay" id="moverlay">
+  <div class="modal">
+    <h2>📋 CSV Ready</h2>
+    <p>Tap <strong>Copy</strong> then paste into WhatsApp, Notes, or email. Or long-press to Select All.</p>
+    <div class="csvbox" id="csvbox"></div>
+    <div class="mbtns">
+      <button class="copybtn" id="copybtn">Copy CSV</button>
+      <button class="closebtn" id="closebtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var P = [
+  {n:"5-HTP 100 mg Now 60 caps",p:18000},
+  {n:"5-HTP 100mg Nutricost 30 caps",p:null},
+  {n:"5-HTP 50 mg Now 30 caps",p:12300},
+  {n:"5-HTP Swanson 60 caps",p:null},
+  {n:"A & D 10,000/400 IU now",p:null},
+  {n:"Acidphilus Century",p:null},
+  {n:"ADAM 60 tabs now",p:null},
+  {n:"Almond Oil",p:null},
+  {n:"Alpha Lipoic 60 caps nutricost",p:15600},
+  {n:"Alpha lipoic acid 60caps 600 Puritans",p:null},
+  {n:"Alpha Lipoic acid amazing formulas 60 caps",p:null},
+  {n:"Alpha lipoic acid Mason 600mg 30 caps",p:null},
+  {n:"Alpha Lipoic Natrol",p:null},
+  {n:"Alpha Lipoic Now 60 cap",p:null},
+  {n:"Apo clopi 75",p:null},
+  {n:"Apple cider 100 tabs Mason",p:null},
+  {n:"Apple cider 1200 natures truth",p:null},
+  {n:"Apple cider Century",p:null},
+  {n:"Apple cider mason",p:null},
+  {n:"Apple Cider Now 180 caps",p:null},
+  {n:"Apple Cider Puritans",p:null},
+  {n:"Apple cider Swanson",p:null},
+  {n:"Arhtriflex Century",p:null},
+  {n:"Artilan",p:null},
+  {n:"Ashwaganda sundance",p:null},
+  {n:"Ashwagandha Mason",p:null},
+  {n:"Ashwaghanda now",p:22000},
+  {n:"Aspirin 81 chewable",p:null},
+  {n:"Aspirin 81 Health a2z",p:null},
+  {n:"B 50 century",p:null},
+  {n:"B Complex Nutrihealth",p:null},
+  {n:"B-1 100 mg Now",p:17500},
+  {n:"B-1 Century",p:null},
+  {n:"B-1 Mason",p:null},
+  {n:"B-1 Now",p:17500},
+  {n:"B-12 500 mcg Puritans 100",p:null},
+  {n:"B-12 Century",p:null},
+  {n:"B-12 Mason",p:null},
+  {n:"B-12 Now",p:13500},
+  {n:"B-2 100 mg Now",p:null},
+  {n:"B-2 100 mg Puritans 100",p:null},
+  {n:"B-2 Nutricost",p:null},
+  {n:"B-50 now",p:null},
+  {n:"B-6 Century",p:14000},
+  {n:"B-6 Mason",p:null},
+  {n:"B-6 Now",p:null},
+  {n:"B-6 puritans",p:null},
+  {n:"B-6 Puritans 100 tabs",p:null},
+  {n:"B-6 Swanson 100 caps",p:null},
+  {n:"B-Complex Puritans",p:null},
+  {n:"B-complex sundown",p:null},
+  {n:"B12 century 500mg",p:null},
+  {n:"B12 Natrol",p:null},
+  {n:"B12 Swanson 100 caps",p:null},
+  {n:"Berberine 90 SG",p:null},
+  {n:"Berberine Nautres truth",p:null},
+  {n:"Berberine Now",p:null},
+  {n:"Berberine Now 60 SG",p:38000},
+  {n:"Berberine Now 90 SG",p:41500},
+  {n:"Betaine HCL",p:null},
+  {n:"Biotin 10 natrol",p:null},
+  {n:"Biotin 10,000 Century",p:null},
+  {n:"Biotin 10,000 natrol",p:null},
+  {n:"Biotin 10,000 Now",p:null},
+  {n:"Biotin 100,000",p:null},
+  {n:"Biotin 10000 nutricost",p:null},
+  {n:"Biotin 5000 50 SG Mason",p:null},
+  {n:"Biotin 5000 Century",p:null},
+  {n:"Biotin 5000 Now",p:null},
+  {n:"Biotin 5000 Puritans 60caps",p:null},
+  {n:"Biotin 5000 Swanson",p:null},
+  {n:"Biotin 5000 Swanson 30caps",p:null},
+  {n:"Biotin Swanson",p:null},
+  {n:"Blood Sugar Balance 30 tabs mason",p:15000},
+  {n:"Boron 3 now 100 caps",p:null},
+  {n:"Boron Swanson",p:null},
+  {n:"Brewer’s Yeast",p:null},
+  {n:"C 1000 tompson",p:null},
+  {n:"C-1000 30 tab",p:null},
+  {n:"C-1000 Century 60 tabs",p:null},
+  {n:"C-1000 now",p:13000},
+  {n:"C-1000 now 100 tabs",p:19500},
+  {n:"C-1000 Now 30 Caps.",p:null},
+  {n:"C-1000 Now Buffered complex 90 tablets",p:27500},
+  {n:"C-1000 Swanson",p:null},
+  {n:"C-500 Mason",p:null},
+  {n:"C-500 Now 100 tab",p:null},
+  {n:"Caffiene nutricost",p:null},
+  {n:"Calcium 600 Mason",p:null},
+  {n:"Calcium D3 100 tabs Mason",p:null},
+  {n:"Calcium d3 Puritans 60 caps",p:null},
+  {n:"Calcium Magnesium Zinc Century",p:12200},
+  {n:"Caltrate blue cenutry",p:14000},
+  {n:"Caltrate Pink century",p:null},
+  {n:"Caltrate pink natures truth",p:null},
+  {n:"Centrum Adult +50 Multi 90 Gummies 1",p:null},
+  {n:"Centrum Adult 200 tab",p:null},
+  {n:"Centrum Adult 60 tab",p:null},
+  {n:"Centrum Adult Multi 110 Gummies",p:null},
+  {n:"Centrum Men +50 Multi 80 Gummies",p:null},
+  {n:"Centrum Men 120 tab",p:null},
+  {n:"Centrum Men 65 Tablets",p:null},
+  {n:"Centrum Men Multi 100 Gummies",p:null},
+  {n:"Centrum Silver Men 40 tabs.",p:null},
+  {n:"Centrum Silver Men 65 tabs.",p:25000},
+  {n:"Centrum Silver Women 40 tabs.",p:null},
+  {n:"Centrum Silver Women 65 tab",p:25000},
+  {n:"Centrum Women +50 Multi 80 Gummies",p:null},
+  {n:"Centrum Women 120 tab",p:null},
+  {n:"Centrum Women 50+ 65 tab",p:null},
+  {n:"Centrum Women 65 Tablets",p:null},
+  {n:"Centrum Women Multi 100 Gummies",p:null},
+  {n:"Choline inositol now 100 caps",p:null},
+  {n:"Chromium 500 puritans",p:null},
+  {n:"Chromium Century 100 tabs",p:null},
+  {n:"Chromium Pico 100 tabs Mason 200 mcg",p:null},
+  {n:"Chromium Pico 500 mcg Puritans",p:null},
+  {n:"Chromium Pico 800 mcg Puritans",p:null},
+  {n:"Chromium Pico Swanson",p:null},
+  {n:"Chromium Thompson",p:null},
+  {n:"Cinnamon Biotin Natrol",p:null},
+  {n:"Citicholine 1000 mg Natures Truth",p:null},
+  {n:"Citicholine 1gm",p:null},
+  {n:"Co Q-10 400 Century 30 caps",p:null},
+  {n:"CO Q-200 Puritans 60 SG",p:null},
+  {n:"CO Q-400mg Puritans 30 SG",p:null},
+  {n:"Coconut oil now",p:null},
+  {n:"Cod Liver Oil Now",p:null},
+  {n:"Collagen C Century",p:null},
+  {n:"Colon Cleanse century",p:null},
+  {n:"Copper Glycinate",p:null},
+  {n:"Copper Natuers Plus",p:null},
+  {n:"Copper Solary",p:null},
+  {n:"Copper Swanson",p:null},
+  {n:"CoQ10 100 now 30 caps",p:null},
+  {n:"CoQ10 200 now 60 caps",p:null},
+  {n:"Cranberry Centruy 60 tabs",p:null},
+  {n:"Creatine Extreme 1000 Puritans 120 caps",p:null},
+  {n:"D3 10,000 Natrol",p:null},
+  {n:"D3 2000 Puritans 100 SG",p:null},
+  {n:"D3 5000 Puritans",p:null},
+  {n:"D3 K2 Swanson",p:null},
+  {n:"D3 Swanon 1000",p:null},
+  {n:"Daily Amino Acid",p:null},
+  {n:"DHEA Century",p:null},
+  {n:"DHEA Mason 50mg 30 SG",p:null},
+  {n:"DHEA natrol",p:null},
+  {n:"Diabetic support Puritans 60 caps",p:null},
+  {n:"Digestive enzyme Swanson",p:null},
+  {n:"Digestive enzymes  century",p:null},
+  {n:"Digestive Enzymes Mason 90 tabs",p:null},
+  {n:"Dim 200 now 90 Caps",p:null},
+  {n:"Doliprane",p:null},
+  {n:"Dopa Mucuna 90 caps",p:null},
+  {n:"Echinacea Extract Now",p:null},
+  {n:"Energy Now",p:null},
+  {n:"Estro Support century",p:null},
+  {n:"evening primrose oil 500 mg now",p:null},
+  {n:"Evening Primrose Oil 60 SG Mason",p:13500},
+  {n:"Evening primrose oil century",p:null},
+  {n:"Evening primrose oil Swanson",p:null},
+  {n:"Foncitril",p:null},
+  {n:"Fungreek 500 100 caps now",p:null},
+  {n:"GABA 500 NOW Now 100 caps",p:null},
+  {n:"Garcinia 1000 mg Now",p:null},
+  {n:"Gastro Comfort",p:null},
+  {n:"Ginseng & Royal Jelly now 90 caps",p:null},
+  {n:"Ginsing puritans",p:null},
+  {n:"Glucomannan Caps",p:null},
+  {n:"Glucomannan Powder",p:null},
+  {n:"Glutathione 500 mg Now",p:23500},
+  {n:"Grapseed Oil Now",p:null},
+  {n:"GTF Chromium 200 mcg 100 tabs",p:14500},
+  {n:"GTF Chromium Puritans",p:12300},
+  {n:"Hair Skin and Nails 50",p:null},
+  {n:"Hair Skin and Nails 90",p:null},
+  {n:"Hair Skin and nails Swanson",p:null},
+  {n:"Healthy Eyes 60 tabs century",p:null},
+  {n:"Hema plex 60",p:null},
+  {n:"Hemafer Syrup",p:null},
+  {n:"Hemafer vials",p:null},
+  {n:"Horny Goat Weed 750mg Now",p:null},
+  {n:"Horny Goat Weed Natures Truth",p:null},
+  {n:"Inositol 500 now 100 caps",p:null},
+  {n:"Iron Century",p:null},
+  {n:"K-2 Puritans 30 caps",p:null},
+  {n:"K2 100 tabs Mason",p:null},
+  {n:"K2 Mason",p:null},
+  {n:"Kelp 325 Now 250 caps",p:null},
+  {n:"Kidney Cleanse 90 caps now",p:null},
+  {n:"L-Arginine 1000 mg Now",p:33000},
+  {n:"L-arginine 1000mg Puritans 100 caps",p:null},
+  {n:"L-arginine 500 Mason",p:null},
+  {n:"L-Arginine 500 Now",p:17500},
+  {n:"L-arginine 500mg Puritans 100 caps",p:null},
+  {n:"L-Arginine Century",p:null},
+  {n:"L-Carnitine 1000 mg Now",p:28500},
+  {n:"L-carnitine 1000 natures truth 30 caps",p:null},
+  {n:"l-Carnitine 1000 nutricost",p:13500},
+  {n:"l-Carnitine 500 now 60 caps",p:null},
+  {n:"L-Carnitine 500 nutricost 30 caps",p:null},
+  {n:"L-carnitine 500 Swanson 30tabs",p:null},
+  {n:"L-carnitine 500mg Doctors best",p:null},
+  {n:"L-Carntine 500 Puritans 60 caps",p:null},
+  {n:"L-Lysine Now",p:null},
+  {n:"L-Tryptophan 500 Now",p:null},
+  {n:"Lavender oil now",p:null},
+  {n:"Lime oil 30 ml",p:null},
+  {n:"Liquid chlorophyll now",p:null},
+  {n:"Liquid D3 59ml  400iu",p:null},
+  {n:"Liquid Melatonin Natrol",p:null},
+  {n:"Liquid Melatonin Now",p:null},
+  {n:"Liver Caps Now",p:null},
+  {n:"Liver complex Puritans",p:null},
+  {n:"Longjack tongkat Ali Natures Truth",p:null},
+  {n:"Lueitin 10 mg century",p:null},
+  {n:"Lutein & Zexanthin now",p:null},
+  {n:"Maca 750 Now 90 caps",p:null},
+  {n:"Maca Now 500",p:null},
+  {n:"Magnesium 250 Puritans",p:null},
+  {n:"Magnesium 420mg nutricost",p:null},
+  {n:"Magnesium 500mg Puritans",p:null},
+  {n:"Magnesium Caps",p:null},
+  {n:"Magnesium Cenutry",p:null},
+  {n:"Magnesium Citrate Now",p:null},
+  {n:"Magnesium citrate Nutricost",p:null},
+  {n:"Magnesium Citrate Puritans",p:null},
+  {n:"Magnesium Citrate Swanson Powder",p:null},
+  {n:"Magnesium Complex 30 caps nutricost",p:13020},
+  {n:"Magnesium Gluconate 550 mg 100 tabs Mason",p:null},
+  {n:"Magnesium Glycinate 120 tab docotrs best",p:null},
+  {n:"Magnesium Glycinate 60 caps Now",p:23500},
+  {n:"Magnesium Glycinate Gummies",p:38000},
+  {n:"Magnesium Glycinate Mason 60 caps",p:null},
+  {n:"Magnesium Glycinate Natures Truth",p:null},
+  {n:"Magnesium Glycinate Now 180 tab",p:null},
+  {n:"Magnesium Glycinate nutricost",p:24180},
+  {n:"Magnesium Glycinate Swanson",p:21390},
+  {n:"Magnesium Malate 1000 Now 100 tabs",p:37500},
+  {n:"Magnesium Malate Nutricost",p:null},
+  {n:"Magnesium Malate swanson 60tab",p:23250},
+  {n:"Magnesium Natrol 250",p:null},
+  {n:"Magnesium orotate KAL",p:null},
+  {n:"Magnesium Orotate Nutricost",p:null},
+  {n:"Magnesium orotate Swanson",p:null},
+  {n:"Magnesium oxide now",p:null},
+  {n:"Magnesium plus ashwa natures truth",p:null},
+  {n:"Magtein Now",p:null},
+  {n:"Manuka Honey",p:null},
+  {n:"Mega D-3 & MK-7 Now",p:25000},
+  {n:"Melatoin 5 Natures Bounty",p:null},
+  {n:"Melatonin 10 century",p:null},
+  {n:"Melatonin 10 Mason 60 caps",p:null},
+  {n:"Melatonin 10 mg Now",p:null},
+  {n:"Melatonin 10 Natrol",p:null},
+  {n:"Melatonin 10 Swanson 60 caps",p:null},
+  {n:"Melatonin 20mg now",p:null},
+  {n:"Melatonin 3mg Mason 60 tabs",p:null},
+  {n:"Melatonin 3mg Natrol",p:null},
+  {n:"Melatonin 3mg Now 60 caps",p:11000},
+  {n:"Melatonin 3mg Swanson 60 caps",p:null},
+  {n:"melatonin 5 Century",p:null},
+  {n:"Melatonin 5 Mason 60 tabs",p:null},
+  {n:"Melatonin 5 mg Now",p:11160},
+  {n:"Melatonin 5 Natrol",p:null},
+  {n:"Melatonin 5 puritans",p:null},
+  {n:"Melatonin 5 Swanson 60 caps",p:null},
+  {n:"Melatonin Puritans 10mg",p:null},
+  {n:"Melatonine 10mg Puritans 120 tabs",p:null},
+  {n:"Melatonine 3mg Puritans 120 tabs",p:null},
+  {n:"Melatonine 5mg Puritans 120 tabs",p:null},
+  {n:"Melatonine Bi layer Puritans 60 tabs",p:null},
+  {n:"Memory complex Natrol",p:null},
+  {n:"Methyl B-12 now",p:14500},
+  {n:"Milk thisle 1000mg Puritans 90 soft gels",p:null},
+  {n:"Milk thisle 175mg Puritans 100 caps",p:null},
+  {n:"Milk thisle 500 Mason 60 caps",p:13975},
+  {n:"Milk thisle 500mg Swanson 100 caps",p:null},
+  {n:"Milk thisle 500mg Swanson 30 caps",p:null},
+  {n:"Milk thisle Nutricost",p:null},
+  {n:"Milk thisle Puritans",p:null},
+  {n:"Milk Thistle 150 Now 60 caps",p:null},
+  {n:"Milk thistle 150mg 120 caps now",p:null},
+  {n:"Milk thistle 525 natrol",p:null},
+  {n:"Milk Thistle Century 60",p:null},
+  {n:"Milk Thistle Extract 300 mg now",p:14900},
+  {n:"Milk Thistle Mason",p:null},
+  {n:"MK7 K2 Now 100mcg 60 caps",p:22000},
+  {n:"MK7 nutricost",p:null},
+  {n:"Moringa Natures Truth",p:null},
+  {n:"MSM Now 120 caps 1000mg",p:null},
+  {n:"Multi enzyme Puritans",p:null},
+  {n:"NAC 30 caps nutricost",p:13100},
+  {n:"NAC 600 mg Now",p:23000},
+  {n:"Nac doctures best 60 caps",p:null},
+  {n:"NAC Swanson",p:null},
+  {n:"Niacin 100mg Puritans 100 tabs",p:null},
+  {n:"Niacin 500mg Now 100 tab",p:14625},
+  {n:"Niacin century 110 tab",p:null},
+  {n:"Niacinamide Century",p:null},
+  {n:"Niacinamide Now",p:null},
+  {n:"Nutri-Serra",p:null},
+  {n:"Omega Fish Oil 30 SG Mason",p:null},
+  {n:"Omega-3 100 cap now",p:null},
+  {n:"Omega-3 200 cap now",p:null},
+  {n:"Omega-3 30 cap now",p:null},
+  {n:"Orange oil Now",p:null},
+  {n:"Oregano oil",p:null},
+  {n:"P-5-P 50mg 90caps",p:21000},
+  {n:"Panax Ginseng",p:null},
+  {n:"Potassium Century",p:null},
+  {n:"Potassium Citrate Now 180 caps",p:null},
+  {n:"Potassium Citrate Swanson",p:null},
+  {n:"Potassium Gluconate 595mg 100 tabs Mason",p:null},
+  {n:"Potassium Gluconate 99 mg Now",p:null},
+  {n:"Potassium Gluconate natures truth",p:null},
+  {n:"Potassium Natures Bounty",p:null},
+  {n:"Potassium Nutricost 30 caps",p:null},
+  {n:"Potassium orotate Swanson",p:null},
+  {n:"Potassium Puritans",p:null},
+  {n:"Prenatal",p:null},
+  {n:"Probiotic Complex",p:null},
+  {n:"Probiotic Mason",p:null},
+  {n:"Probiotic Natures Bounty",p:null},
+  {n:"Probiotic Puritans",p:null},
+  {n:"Probiotic Swanson",p:null},
+  {n:"Probiotic-10 25 Billion Now",p:21000},
+  {n:"Prostate health century",p:null},
+  {n:"Prostate support now",p:null},
+  {n:"Riboflavin B2 Natures Way",p:null},
+  {n:"Riboflavin Swanson",p:null},
+  {n:"Royal Jelly",p:null},
+  {n:"Saw Palmetto 550 Now",p:null},
+  {n:"Saw Palmetto extract 320 mg Now",p:null},
+  {n:"Selenium 100 mcg Now",p:13000},
+  {n:"Selenium 200 mcg Puritans 100tabs",p:null},
+  {n:"Selenium 200 natures truth 100 tabs",p:null},
+  {n:"Selenium 200 Now",p:14600},
+  {n:"Selenium 200mcg 60 tabs Mason",p:11000},
+  {n:"Selenium 200mcg Century",p:null},
+  {n:"Selenium Complex Swanson",p:null},
+  {n:"Selenium Futurebiotic",p:null},
+  {n:"Selenium Natures Bounty",p:null},
+  {n:"Selenium Natures truth",p:null},
+  {n:"Selenium Sprin Vally 200",p:null},
+  {n:"Selenium Swanson",p:null},
+  {n:"Serrapeptase Lake Avenue",p:null},
+  {n:"Serrapeptase Now",p:null},
+  {n:"Spirulina 1000 120tabs now",p:null},
+  {n:"Spirulina 500 100tabs now",p:null},
+  {n:"Super Enzymes Now",p:24700},
+  {n:"Super Primrose 1300 mg Now",p:24000},
+  {n:"TestoJack 100 Now",p:null},
+  {n:"TestoJack 200 Now",p:null},
+  {n:"TestoJack 300 Now",p:null},
+  {n:"Thyroid Energy",p:null},
+  {n:"Tri-Chromium Now",p:15000},
+  {n:"Triple Magnesium 60 caps Puritans",p:null},
+  {n:"Triple Magnesium Swanson",p:12090},
+  {n:"Triple omega 3,6,9 Century",p:null},
+  {n:"Triple Omega 3,6,9 Puritans 120 SG",p:null},
+  {n:"Turmeric Century",p:null},
+  {n:"Turmeric Curcumin Now",p:29500},
+  {n:"Turmeric Swanson",p:null},
+  {n:"Unigesic",p:null},
+  {n:"Valerian Root Natures Truth",p:null},
+  {n:"Vitamin A 10,000 IU now",p:null},
+  {n:"Vitamin A 100 SG Masnon",p:null},
+  {n:"Vitamin A 3000 mcg century",p:null},
+  {n:"Vitamin D-3 & K-2 now",p:18000},
+  {n:"Vitamin D-3 & K-2 Puritans",p:null},
+  {n:"Vitamin D-3 10,000 IU Now",p:null},
+  {n:"Vitamin D-3 2000 Now",p:null},
+  {n:"Vitamin D-3 5,000 IU Now",p:null},
+  {n:"Vitamin D-3 50,000 IU Now",p:null},
+  {n:"Vitamin D3 1000 century",p:null},
+  {n:"Vitamin E Nature Wise",p:null},
+  {n:"Vitamin E natures truth",p:null},
+  {n:"Vitamin E Puritans",p:null},
+  {n:"Vitamin K puritans",p:null},
+  {n:"Vitamin K-2 Now",p:18000},
+  {n:"Water Out",p:null},
+  {n:"Xyli white charcoal",p:null},
+  {n:"Xyli white green refreshment",p:null},
+  {n:"Zinc 25 Puritans",p:null},
+  {n:"Zinc 50 mg Now",p:13000},
+  {n:"Zinc 50 Puritans",p:null},
+  {n:"Zinc 50mg 100 tabs Mason",p:null},
+  {n:"Zinc 50mg 250 tab now",p:null},
+  {n:"Zinc and C Swanson",p:null},
+  {n:"Zinc Century",p:null},
+  {n:"Zinc Citrate Swanson",p:null},
+  {n:"Zinc gluconate 100 tabs Natures truth",p:null},
+  {n:"Zinc gluconate Sundance 90tabs",p:null},
+  {n:"Zinc Glycinate Now",p:null},
+  {n:"Zinc pico 25mg Puritans",p:null},
+  {n:"Zinc Picolinate 50 mg",p:null},
+  {n:"Zinc Picolinate Now",p:11000},
+  {n:"Zinc picolinate Nutricost",p:null},
+  {n:"Zinc Picolinate Swanson",p:null},
+  {n:"Zoo Multi Kids",p:null},
+];
+
+// Deduplicate by name (case-insensitive)
+(function(){
+  var seen={};
+  P=P.filter(function(x){
+    var k=x.n.toLowerCase();
+    if(seen[k]) return false;
+    seen[k]=1;
+    return true;
+  });
+  // Sort each brand group A-Z
+  P.sort(function(a,b){return a.n.toLowerCase()<b.n.toLowerCase()?-1:1});
+})();
+
+// Brand detection
+var BRANDS=['All','NOW','Puritans','Mason','Swanson','Nutricost','Century','Natrol',"Nature's Truth","Nature's Bounty",'Centrum',"Doctor's Best",'Sundance','Other'];
+function getBrand(n){
+  var l=n.toLowerCase();
+  if(l.includes('puritans')) return 'Puritans';
+  if(l.includes('swanson')) return 'Swanson';
+  if(l.includes('mason') || l.includes('masnon')) return 'Mason';
+  if(l.includes('nutricost')) return 'Nutricost';
+  if(l.includes('century') || l.includes('cenutry') || l.includes('centruy')) return 'Century';
+  if(l.includes('natrol')) return 'Natrol';
+  if(l.includes('natures truth') || l.includes('nautres truth') || l.includes('natures truth')) return "Nature's Truth";
+  if(l.includes('natures bounty')) return "Nature's Bounty";
+  if(l.includes('centrum')) return 'Centrum';
+  if(l.includes('doctors best') || l.includes('docotrs') || l.includes('doctures')) return "Doctor's Best";
+  if(l.includes('sundance')) return 'Sundance';
+  if(l.includes('now')) return 'NOW';
+  return 'Other';
+}
+
+var cart=[];
+var activeBrand='All';
+var freq={}; // tracks how many times each product has been added across the session
+
+// Default date
+var t=new Date();
+document.getElementById('idate').value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+
+// ── CHIPS
+function renderChips(){
+  var el=document.getElementById('chips');
+  var hasFreq=Object.keys(freq).length>0;
+  var brands=hasFreq?['All','⭐ Frequent'].concat(BRANDS.slice(1)):BRANDS;
+  el.innerHTML=brands.map(function(b){
+    return '<button class="chip'+(activeBrand===b?' active':'')+'" data-brand="'+esc(b)+'">'+esc(b)+'</button>';
+  }).join('');
+  // Reset activeBrand if it's ⭐ Frequent but freq is now empty
+  if(!hasFreq && activeBrand==='⭐ Frequent') activeBrand='All';
+}
+document.getElementById('chips').addEventListener('click',function(e){
+  var btn=e.target;
+  if(btn.classList.contains('chip')){
+    activeBrand=btn.getAttribute('data-brand');
+    renderChips();
+    renderProducts();
+  }
+});
+
+// ── PRODUCTS
+function renderProducts(){
+  var q=document.getElementById('srch').value.toLowerCase().trim();
+  var el=document.getElementById('plist');
+  var inCartNames={};
+  cart.forEach(function(c){inCartNames[c.n.toLowerCase()]=1;});
+  var filtered;
+  if(!q && activeBrand==='⭐ Frequent'){
+    // Show only items that have been added before, sorted by frequency desc
+    filtered=P.filter(function(x){return freq[x.n]>0;});
+    filtered.sort(function(a,b){return (freq[b.n]||0)-(freq[a.n]||0);});
+    filtered=filtered.slice(0,15);
+  } else {
+    filtered=P.filter(function(x){
+      if(q && x.n.toLowerCase().indexOf(q)===-1) return false;
+      if(!q && activeBrand!=='All' && getBrand(x.n)!==activeBrand) return false;
+      return true;
+    });
+  }
+  if(!filtered.length){el.innerHTML='<div class="nores">No products found</div>';return;}
+  el.innerHTML=filtered.map(function(x,i){
+    var ic=inCartNames[x.n.toLowerCase()]?1:0;
+    var ptag=x.p!=null?'<span class="ptag has">IQD '+x.p.toLocaleString()+'</span>':'<span class="ptag no">Price needed</span>';
+    return '<div class="pitem'+(ic?' ic':'')+'" data-idx="'+P.indexOf(x)+'">'+
+      '<span class="pname">'+esc(x.n)+'</span>'+ptag+
+      '<div class="addcircle"><svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>'+
+      '</div>';
+  }).join('');
+}
+document.getElementById('plist').addEventListener('click',function(e){
+  var el=e.target;
+  while(el&&el!==this){
+    if(el.classList.contains('pitem')){addToCart(parseInt(el.getAttribute('data-idx'),10));return;}
+    el=el.parentElement;
+  }
+});
+
+// ── SEARCH
+document.getElementById('srch').addEventListener('input',function(){
+  document.getElementById('clrbtn').style.display=this.value?'block':'none';
+  renderProducts();
+});
+document.getElementById('clrbtn').addEventListener('click',function(){
+  document.getElementById('srch').value='';
+  this.style.display='none';
+  renderProducts();
+});
+
+// ── CART
+function addToCart(idx){
+  var prod=P[idx];
+  if(!prod||cart.some(function(c){return c.n===prod.n;})) return;
+  cart.push({n:prod.n,base:prod.p,qty:1,cp:prod.p});
+  freq[prod.n]=(freq[prod.n]||0)+1;
+  renderChips();renderCart();renderProducts();updateTotal();
+}
+function removeFromCart(ci){
+  cart.splice(ci,1);
+  renderCart();renderProducts();updateTotal();
+}
+function renderCart(){
+  var el=document.getElementById('clist');
+  if(!cart.length){el.innerHTML='<div class="cempty"><div class="cempty-icon">🛒</div>Tap a product above to add it</div>';return;}
+  el.innerHTML=cart.map(function(item,ci){
+    var missing=item.base==null;
+    var pv=item.cp!=null?item.cp:'';
+    var sub=(pv!==''&&pv!=null)?'Subtotal: <b>IQD '+(item.cp*item.qty).toLocaleString()+'</b>':'<span style="color:#ff9500">Price missing</span>';
+    return '<div class="citem">'+
+      '<div class="ctop"><span class="cname">'+esc(item.n)+'</span>'+
+      '<button class="rmbtn" data-action="rm" data-ci="'+ci+'" type="button"><svg width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>'+
+      '<div class="ctrls">'+
+      '<div class="ctrl"><label>Qty</label>'+
+      '<input type="number" inputmode="numeric" min="1" value="'+item.qty+'" data-action="qty" data-ci="'+ci+'"></div>'+
+      '<div class="ctrl"><label>Unit Price (IQD)</label>'+
+      '<input type="number" inputmode="decimal" min="0" placeholder="'+(missing?'Enter price…':'')+'" value="'+(pv!==''?pv:'')+'" class="'+(missing?'np':'')+'" data-action="price" data-ci="'+ci+'">'+
+      (missing?'<div class="nlbl">⚠️ Not in sheet</div>':'')+
+      '</div></div>'+
+      '<div class="sub" id="sub'+ci+'">'+sub+'</div>'+
+      '</div>';
+  }).join('');
+}
+document.getElementById('clist').addEventListener('click',function(e){
+  var btn=e.target;
+  while(btn&&btn!==this){
+    if(btn.getAttribute('data-action')==='rm'){removeFromCart(parseInt(btn.getAttribute('data-ci'),10));return;}
+    btn=btn.parentElement;
+  }
+});
+document.getElementById('clist').addEventListener('input',function(e){
+  var inp=e.target,a=inp.getAttribute('data-action'),ci=parseInt(inp.getAttribute('data-ci'),10);
+  if(isNaN(ci)) return;
+  if(a==='qty'){cart[ci].qty=Math.max(1,parseInt(inp.value,10)||1);}
+  else if(a==='price'){var v=inp.value.trim();cart[ci].cp=v===''?null:parseFloat(v);}
+  refreshSub(ci);updateTotal();
+});
+function refreshSub(ci){
+  var el=document.getElementById('sub'+ci);if(!el) return;
+  var item=cart[ci];
+  el.innerHTML=(item.cp!=null&&item.cp!=='')?'Subtotal: <b>IQD '+(item.cp*item.qty).toLocaleString()+'</b>':'<span style="color:#ff9500">Price missing</span>';
+}
+function updateTotal(){
+  var tot=0,miss=false;
+  cart.forEach(function(c){c.cp!=null?tot+=c.cp*c.qty:miss=true;});
+  document.getElementById('tamt').textContent='IQD '+tot.toLocaleString();
+  document.getElementById('mnote').style.display=miss?'block':'none';
+}
+
+// ── EXPORT
+document.getElementById('expbtn').addEventListener('click',function(){
+  var cn=document.getElementById('cname').value.trim();
+  var dt=document.getElementById('idate').value;
+  if(!cn){alert('Please enter a customer name.');document.getElementById('cname').focus();return;}
+  if(!dt){alert('Please select a date.');return;}
+  if(!cart.length){alert('Please add at least one product.');return;}
+  if(cart.some(function(c){return c.cp==null;})){if(!confirm('Some items are missing a price. Export anyway?')) return;}
+
+  var rows=[['Customer Name','Date','Product Name','Unit Price (IQD)','Quantity','Total (IQD)']];
+  cart.forEach(function(item){
+    var up=item.cp!=null?item.cp:'';
+    var tot=up!==''?(parseFloat(up)*item.qty):'';
+    rows.push([cn,dt,item.n,up,item.qty,tot]);
+  });
+  var csv=rows.map(function(r){
+    return r.map(function(c){
+      var s=String(c);
+      return(s.indexOf(',')>=0||s.indexOf('"')>=0||s.indexOf('\n')>=0)?'"'+s.replace(/"/g,'""')+'"':s;
+    }).join(',');
+  }).join('\n');
+
+  // Try download (desktop/Android)
+  var done=false;
+  try{
+    var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='invoice_'+cn.replace(/\s+/g,'_')+'_'+dt+'.csv';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    done=true;
+  }catch(e){done=false;}
+
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  if(isIOS||!done){
+    document.getElementById('csvbox').textContent=csv;
+    document.getElementById('copybtn').textContent='Copy CSV';
+    document.getElementById('copybtn').className='copybtn';
+    document.getElementById('moverlay').classList.add('open');
+  }
+
+  // Clear form
+  document.getElementById('cname').value='';
+  var t2=new Date();
+  document.getElementById('idate').value=t2.getFullYear()+'-'+String(t2.getMonth()+1).padStart(2,'0')+'-'+String(t2.getDate()).padStart(2,'0');
+  cart=[];renderCart();renderProducts();updateTotal();
+});
+
+// ── MODAL
+document.getElementById('copybtn').addEventListener('click',function(){
+  var txt=document.getElementById('csvbox').textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){
+      document.getElementById('copybtn').textContent='✓ Copied!';
+      document.getElementById('copybtn').className='copybtn done';
+    }).catch(function(){fbCopy(txt);});
+  } else {fbCopy(txt);}
+});
+function fbCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');
+    document.getElementById('copybtn').textContent='✓ Copied!';
+    document.getElementById('copybtn').className='copybtn done';
+  }catch(e){alert('Long-press the text above → Select All → Copy.');}
+  document.body.removeChild(ta);
+}
+document.getElementById('closebtn').addEventListener('click',function(){document.getElementById('moverlay').classList.remove('open');});
+document.getElementById('moverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── INVOICE IMAGE EXPORT
+document.getElementById('imgbtn').addEventListener('click',function(){
+  var cn=document.getElementById('cname').value.trim();
+  var dt=document.getElementById('idate').value;
+  if(!cn){alert('Please enter a customer name.');document.getElementById('cname').focus();return;}
+  if(!dt){alert('Please select a date.');return;}
+  if(!cart.length){alert('Please add at least one product.');return;}
+  var dataURL=drawInvoice(cn,dt,cart);
+  document.getElementById('invoiceimg').src=dataURL;
+  document.getElementById('imgoverlay').classList.add('open');
+  document.getElementById('dlbtn').onclick=function(){
+    var a=document.createElement('a');
+    a.href=dataURL;
+    a.download='invoice_'+cn.replace(/\s+/g,'_')+'_'+dt+'.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+  };
+});
+document.getElementById('imgclosebtn').addEventListener('click',function(){document.getElementById('imgoverlay').classList.remove('open');});
+document.getElementById('imgoverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+function drawInvoice(customer,date,items){
+  var SC=2; // retina scale
+  var W=780;
+  var PAD=30;
+  var ROWH=38;
+  var HEADER_H=130;
+  var INFO_H=70;
+  var THEAD_H=38;
+  var TOTAL_H=62;
+  var FOOT_H=32;
+  var H=HEADER_H+INFO_H+THEAD_H+(items.length*ROWH)+TOTAL_H+FOOT_H+PAD;
+
+  var cv=document.createElement('canvas');
+  cv.width=W*SC; cv.height=H*SC;
+  var c=cv.getContext('2d');
+  c.scale(SC,SC);
+
+  // ── Background
+  c.fillStyle='#ffffff';
+  c.fillRect(0,0,W,H);
+
+  // ── Blue header bar
+  c.fillStyle='#007aff';
+  c.fillRect(0,0,W,HEADER_H);
+
+  // Invoice title
+  c.fillStyle='#ffffff';
+  c.font='bold 34px Arial, Helvetica, sans-serif';
+  c.fillText('INVOICE',PAD,54);
+
+  // Small logo dots
+  for(var d=0;d<3;d++){
+    c.beginPath();c.arc(W-PAD-d*22,36,8,0,Math.PI*2);
+    c.fillStyle='rgba(255,255,255,'+(0.3+d*0.25)+')';
+    c.fill();
+  }
+
+  // Customer & date in header
+  c.fillStyle='rgba(255,255,255,0.88)';
+  c.font='13px Arial, Helvetica, sans-serif';
+  c.fillText('BILL TO',PAD,80);
+  c.fillStyle='#ffffff';
+  c.font='bold 17px Arial, Helvetica, sans-serif';
+  c.fillText(customer,PAD,100);
+  c.font='13px Arial, Helvetica, sans-serif';
+  c.fillStyle='rgba(255,255,255,0.85)';
+  c.fillText('Date: '+date,PAD,120);
+
+  // ── Info row (item count + total)
+  var grandTotal=0,hasMissing=false;
+  items.forEach(function(it){it.cp!=null?grandTotal+=it.cp*it.qty:hasMissing=true;});
+  var y0=HEADER_H;
+  c.fillStyle='#f0f7ff';
+  c.fillRect(0,y0,W,INFO_H);
+  c.strokeStyle='#cce0ff';
+  c.lineWidth=1;
+  c.beginPath();c.moveTo(0,y0+INFO_H);c.lineTo(W,y0+INFO_H);c.stroke();
+
+  c.fillStyle='#8e8e93';
+  c.font='11px Arial, Helvetica, sans-serif';
+  c.fillText('ITEMS',PAD,y0+20);
+  c.fillStyle='#1c1c1e';
+  c.font='bold 22px Arial, Helvetica, sans-serif';
+  c.fillText(items.length,PAD,y0+50);
+
+  c.fillStyle='#8e8e93';
+  c.font='11px Arial, Helvetica, sans-serif';
+  var totalLbl='TOTAL'+(hasMissing?' (partial)':'');
+  var totalStr='IQD '+grandTotal.toLocaleString();
+  c.fillText(totalLbl,W-PAD-c.measureText(totalStr).width-10,y0+20);
+  c.fillStyle='#007aff';
+  c.font='bold 22px Arial, Helvetica, sans-serif';
+  c.fillText(totalStr,W-PAD-c.measureText(totalStr).width,y0+50);
+
+  // ── Table header
+  var th=HEADER_H+INFO_H;
+  c.fillStyle='#f2f2f7';
+  c.fillRect(0,th,W,THEAD_H);
+  c.strokeStyle='#e5e5ea';c.lineWidth=1;
+  c.beginPath();c.moveTo(0,th+THEAD_H);c.lineTo(W,th+THEAD_H);c.stroke();
+
+  c.fillStyle='#8e8e93';
+  c.font='bold 11px Arial, Helvetica, sans-serif';
+  var cols=[PAD, W*0.55, W*0.68, W*0.80];
+  var hdrs=['PRODUCT NAME','UNIT PRICE (IQD)','QTY','TOTAL (IQD)'];
+  hdrs.forEach(function(h,i){c.fillText(h,cols[i],th+THEAD_H-13);});
+
+  // ── Items
+  items.forEach(function(item,i){
+    var ry=th+THEAD_H+i*ROWH;
+    c.fillStyle=i%2===0?'#ffffff':'#f9f9fb';
+    c.fillRect(0,ry,W,ROWH);
+    // bottom border
+    c.strokeStyle='#f2f2f7';c.lineWidth=1;
+    c.beginPath();c.moveTo(0,ry+ROWH);c.lineTo(W,ry+ROWH);c.stroke();
+
+    var textY=ry+ROWH-12;
+    // Product name (truncated)
+    c.fillStyle='#1c1c1e';
+    c.font='13px Arial, Helvetica, sans-serif';
+    var maxW=(W*0.55)-PAD-10;
+    var nm=item.n;
+    while(nm.length>0&&c.measureText(nm+'…').width>maxW) nm=nm.slice(0,-1);
+    if(nm.length<item.n.length) nm=nm+'…';
+    c.fillText(nm,PAD,textY);
+
+    // Unit price
+    var up=item.cp!=null?item.cp.toLocaleString():'—';
+    c.fillStyle=item.cp!=null?'#1c1c1e':'#ff9500';
+    c.font='13px Arial, Helvetica, sans-serif';
+    c.fillText(up,cols[1],textY);
+
+    // Qty
+    c.fillStyle='#1c1c1e';
+    c.fillText(String(item.qty),cols[2],textY);
+
+    // Total
+    var lt=item.cp!=null?(item.cp*item.qty).toLocaleString():'—';
+    c.fillStyle=item.cp!=null?'#1c1c1e':'#ff9500';
+    c.font='bold 13px Arial, Helvetica, sans-serif';
+    c.fillText(lt,cols[3],textY);
+  });
+
+  // ── Total row
+  var ty=th+THEAD_H+items.length*ROWH;
+  c.fillStyle='#007aff';
+  c.fillRect(0,ty,W,TOTAL_H);
+  c.fillStyle='rgba(255,255,255,0.7)';
+  c.font='13px Arial, Helvetica, sans-serif';
+  c.fillText('GRAND TOTAL'+(hasMissing?' (prices missing for some items)':''),PAD,ty+TOTAL_H-26);
+  c.fillStyle='#ffffff';
+  c.font='bold 24px Arial, Helvetica, sans-serif';
+  c.fillText('IQD '+grandTotal.toLocaleString(),PAD,ty+TOTAL_H-4);
+
+  // ── Footer
+  var fy=ty+TOTAL_H;
+  c.fillStyle='#f2f2f7';
+  c.fillRect(0,fy,W,FOOT_H);
+  c.fillStyle='#c7c7cc';
+  c.font='11px Arial, Helvetica, sans-serif';
+  c.fillText('Generated '+date,PAD,fy+20);
+
+  return cv.toDataURL('image/png');
+}
+
+// ── WHATSAPP SHARE
+document.getElementById('wabtn').addEventListener('click',function(){
+  var cn=document.getElementById('cname').value.trim();
+  var dt=document.getElementById('idate').value;
+  if(!cn){alert('Please enter a customer name.');document.getElementById('cname').focus();return;}
+  if(!cart.length){alert('Please add at least one product.');return;}
+
+  var lines=[];
+  lines.push('🧾 *Invoice — Hamodi*');
+  lines.push('👤 Customer: *'+cn+'*');
+  if(dt) lines.push('📅 Date: '+dt);
+  lines.push('─────────────────');
+  var grand=0, hasMissing=false;
+  cart.forEach(function(item,i){
+    var row='• '+item.n+' × '+item.qty;
+    if(item.cp!=null){
+      var sub=item.cp*item.qty;
+      grand+=sub;
+      row+=' = IQD '+sub.toLocaleString();
+    } else {
+      hasMissing=true;
+      row+=' *(price missing)*';
+    }
+    lines.push(row);
+  });
+  lines.push('─────────────────');
+  lines.push('💰 *Total: IQD '+grand.toLocaleString()+(hasMissing?' + missing prices':'')+'*');
+
+  var text=lines.join('\n');
+  var encoded=encodeURIComponent(text);
+  // Try native WhatsApp URL scheme first (works on mobile), fall back to web
+  var waURL='whatsapp://send?text='+encoded;
+  var webURL='https://wa.me/?text='+encoded;
+
+  // On iOS/Android use the app scheme; on desktop use web
+  var isMobile=/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+  window.open(isMobile?waURL:webURL,'_blank');
+});
+
+// ── CUSTOM ITEM
+document.getElementById('custbtn').addEventListener('click', function(){
+  document.getElementById('cust-name').value='';
+  document.getElementById('cust-price').value='';
+  document.getElementById('cust-qty').value='1';
+  document.getElementById('custoverlay').classList.add('open');
+  setTimeout(function(){document.getElementById('cust-name').focus();},120);
+});
+document.getElementById('custcancelbtn').addEventListener('click', function(){
+  document.getElementById('custoverlay').classList.remove('open');
+});
+document.getElementById('custoverlay').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('open');
+});
+document.getElementById('custaddbtn').addEventListener('click', function(){
+  var nm=document.getElementById('cust-name').value.trim();
+  if(!nm){alert('Please enter an item name.');document.getElementById('cust-name').focus();return;}
+  var pv=document.getElementById('cust-price').value.trim();
+  var price=pv===''?null:parseFloat(pv);
+  var qty=Math.max(1,parseInt(document.getElementById('cust-qty').value,10)||1);
+  cart.push({n:nm, base:price, qty:qty, cp:price, custom:true});
+  renderCart();
+  updateTotal();
+  document.getElementById('custoverlay').classList.remove('open');
+});
+
+// ── INIT
+renderChips();
+renderProducts();
+</script>
+</body>
+</html>
